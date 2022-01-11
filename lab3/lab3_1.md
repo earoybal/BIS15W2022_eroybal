@@ -238,7 +238,8 @@ hsprings
 2. Change the column titled `name` to `scientist`, leave the other column names the same. Print out the data frame names.  
 
 ```r
-rename(hsprings, scientist = name)
+hsprings <- rename(hsprings, 'scientist' = 'name')
+hsprings
 ```
 
 ```
@@ -254,23 +255,6 @@ rename(hsprings, scientist = name)
 ## 9  29.20     Steve Travertine
 ```
 
-```r
-hsprings
-```
-
-```
-##   temp_C  name     spring
-## 1  36.25  Jill    Buckeye
-## 2  35.40 Susan    Buckeye
-## 3  35.30 Steve    Buckeye
-## 4  35.15  Jill     Benton
-## 5  35.35 Susan     Benton
-## 6  33.35 Steve     Benton
-## 7  30.70  Jill Travertine
-## 8  29.65 Susan Travertine
-## 9  29.20 Steve Travertine
-```
-
 3. Our scientists forgot to record the depth data for each spring. Here it is as a vector, add it as a new column called depth_ft: `c(4.15, 4.13, 4.12, 3.21, 3.23, 3.20, 5.67, 5.65, 5.66)`. Print out the data frame.
 
 ```r
@@ -282,16 +266,16 @@ hsprings
 ```
 
 ```
-##   temp_C  name     spring depth_ft
-## 1  36.25  Jill    Buckeye     4.15
-## 2  35.40 Susan    Buckeye     4.13
-## 3  35.30 Steve    Buckeye     4.12
-## 4  35.15  Jill     Benton     3.21
-## 5  35.35 Susan     Benton     3.23
-## 6  33.35 Steve     Benton     3.20
-## 7  30.70  Jill Travertine     5.67
-## 8  29.65 Susan Travertine     5.65
-## 9  29.20 Steve Travertine     5.66
+##   temp_C scientist     spring depth_ft
+## 1  36.25      Jill    Buckeye     4.15
+## 2  35.40     Susan    Buckeye     4.13
+## 3  35.30     Steve    Buckeye     4.12
+## 4  35.15      Jill     Benton     3.21
+## 5  35.35     Susan     Benton     3.23
+## 6  33.35     Steve     Benton     3.20
+## 7  30.70      Jill Travertine     5.67
+## 8  29.65     Susan Travertine     5.65
+## 9  29.20     Steve Travertine     5.66
 ```
 
 4. Calculate the mean temperature of all of the temperature measurements.

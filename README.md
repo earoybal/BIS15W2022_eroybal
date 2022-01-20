@@ -1,5 +1,6 @@
 # BIS15L WQ2022 Repository
 ## Contact Info
+#### Name: Evan Roybal
 #### Email: earoybal@ucdavis.edu
 #### Office: I wish I had one
 ## Overview

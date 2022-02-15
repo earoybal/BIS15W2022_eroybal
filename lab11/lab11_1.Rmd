@@ -33,7 +33,6 @@ Please make sure that you have 1-2 data sets to share with your group member dur
 #install.packages("RColorBrewer")
 #install.packages("paletteer")
 #install.packages("ggthemes")
-#install.packages('gtools')
 ```
 
 ## Load the libraries
@@ -43,7 +42,6 @@ library(RColorBrewer)
 library(paletteer)
 library(janitor)
 library(here)
-library(gtools)
 ```
 
 ```{r}
@@ -131,27 +129,17 @@ homerange %>%
 ## Practice
 1. Make a histogram of `log10.hra`. Make sure to add a title.
 ```{r}
-homerange %>%
-  ggplot(aes(x = log10.hra)) +
-  geom_histogram(bar = 40, alpha = 0.5, color = 'gray10', fill = 'gray 45') +
-  labs(title = 'Distribution of log10.hra values')
+
 ```
 
 2. Now plot the same variable using `geom_density()`.
 ```{r}
-homerange %>%
-  ggplot(aes(x = log10.hra)) +
-  geom_density(size = 1, color = 'forest green', fill = 'maroon') +
-  labs(title = 'Density of log10.hra Values')
+
 ```
 
 3. Combine them both!
 ```{r}
-homerange %>%
-  ggplot(aes(x = log10.hra)) +
-  geom_histogram(aes(y = ..density..), fill = 'sky blue', color = 'gray 34', alpha = .5, bin = 10) +
-  geom_density(color = 'yellow', size = 1.25) +
-  labs(title = 'Distribution of Homerange Sizes')
+
 ```
 
 ## Create Categories with mutate and case_when()
@@ -207,26 +195,12 @@ table(quartiles)
 
 2. How many and which taxonomic classes are represented in each of the `range_category` classes?
 ```{r}
-range_cat_homerange <- homerange %>%
-  mutate(range_category = case_when(log10.hra <= 3.653 ~ 'very small',
-                                    log10.hra > 3.653 & log10.hra <= 4.595 ~ 'small',
-                                    log10.hra > 4.595 & log10.hra <= 6.016 ~ 'medium',
-                                    log10.hra > 6.016 ~ 'large'))
-head(range_cat_homerange)
 
-range_cat_homerange %>%
-  ggplot(aes(x = range_category, fill = class)) +
-  geom_bar(position = 'dodge', color = 'lavender', alpha = .25) +
-  labs(title = 'range of taxonomic classes in mass sizes')
 ```
 
 3. Isolate the small `range_category` and plot the range of `log10.mass` by taxonomic class.
 ```{r}
-range_cat_homerange %>%
-  filter(range_category == 'small') %>%
-  ggplot(aes(x = class, y = log10.mass)) +
-  geom_boxplot() +
-  labs(title = 'range of mass for small animals in each class')
+
 ```
 
 ## That's it! Take a break and I will see you on Zoom!  

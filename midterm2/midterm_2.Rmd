@@ -1,0 +1,224 @@
+---
+title: "BIS 15L Midterm 2"
+author: 'Evan Roybal'
+output:
+  html_document: 
+    theme: spacelab
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+turning off scientific notation
+```{r}
+options(scipen = 999)
+```
+
+## Instructions
+Answer the following questions and complete the exercises in RMarkdown. Please embed all of your code and push your final work to your repository. Your code should be organized, clean, and run free from errors. Be sure to **add your name** to the author header above. You may use any resources to answer these questions (including each other), but you may not post questions to Open Stacks or external help sites. There are 10 total questions.  
+
+Make sure to use the formatting conventions of RMarkdown to make your report neat and clean! Your plots should use consistent aesthetics throughout.  
+
+This exam is due by **12:00p on Tuesday, February 22**.  
+
+Loading packages
+```{r}
+library(tidyverse)
+library(naniar)
+library(here)
+library(janitor)
+library(skimr)
+```
+
+
+## Gapminder
+For this assignment, we are going to use data from  [gapminder](https://www.gapminder.org/). Gapminder includes information about economics, population, social issues, and life expectancy from countries all over the world. We will use three data sets, so please load all three as separate objects.    
+
+1. population_total.csv  
+2. income_per_person_gdppercapita_ppp_inflation_adjusted.csv  
+3. life_expectancy_years.csv  
+
+Loading Gapminder data
+```{r}
+population_total <- read.csv('data/population_total.csv')
+income_gdp_inflation <- read.csv('data/income_per_person_gdppercapita_ppp_inflation_adjusted.csv')
+life_expectancy <- read.csv('data/life_expectancy_years.csv')
+```
+
+
+1. (3 points) Once you have an idea of the structure of the data, please make each data set tidy (hint: think back to pivots) and store them as new objects. You will need both the original (wide) and tidy (long) data!  
+
+inspecting and tidying population_total
+```{r}
+head(population_total)
+anyNA(population_total)
+
+#cleaning names
+population_total <- clean_names(population_total)
+
+colnames(population_total)
+
+#pivoting dataframe
+population_total_long <- population_total %>%
+  pivot_longer(-country,
+               names_to = 'year',
+               values_to = 'population_size')
+  
+#removing x from year
+population_total_long$year <- population_total_long$year %>%
+  str_replace('x','')
+
+#converting year to integer
+population_total_long$year <- as.integer(population_total_long$year)
+head(population_total_long)
+nrow(population_total_long)
+summary(population_total_long)
+
+skim(population_total_long)
+```
+
+inspecting and tidying income_gdp_inflation
+```{r}
+head(income_gdp_inflation)
+anyNA(income_gdp_inflation)
+
+skim(income_gdp_inflation)
+
+#cleaning column names
+income_gdp_inflation <- clean_names(income_gdp_inflation)
+colnames(income_gdp_inflation)
+
+#pivoting longer
+income_long <- income_gdp_inflation %>%
+  pivot_longer(-country,
+               names_to = 'year',
+               values_to = 'income')
+
+head(income_long)
+
+#removing x and converting year to integer
+income_long$year <- income_long$year %>%
+  str_replace('x','') %>%
+  as.integer()
+
+head(income_long)
+skim(income_long)
+
+```
+
+inspecting and tidying life_expectancy
+```{r}
+head(life_expectancy)
+anyNA(life_expectancy)
+
+miss_var_summary(life_expectancy)
+skim(life_expectancy)
+
+#pivoting life_expectancy
+life_expectancy_long <- life_expectancy %>%
+  pivot_longer(-country,
+               names_to = 'year',
+               values_to = 'life_expectancy')
+
+head(life_expectancy_long)
+#removing x and changing year to integer
+life_expectancy_long$year <- life_expectancy_long$year %>%
+  str_replace('X', '') %>%
+  as.integer()
+
+miss_var_summary(life_expectancy_long)
+head(life_expectancy_long)
+```
+
+
+2. (1 point) How many different countries are represented in the data? Provide the total number and their names. Since each data set includes different numbers of countries, you will need to do this for each one.  
+
+#finding number of and names of countries
+
+population_total
+```{r}
+tabyl(population_total_long$country)
+count(tabyl(population_total_long$country))
+```
+
+income
+```{r}
+tabyl(income_long$country)
+count(tabyl(income_long$country))
+```
+
+life_expectancy
+```{r}
+tabyl(life_expectancy_long$country)
+count(tabyl(life_expectancy_long$country))
+```
+## Life Expectancy  
+
+3. (2 points) Let's limit the data to 100 years (1920-2020). For these years, which country has the highest average life expectancy? How about the lowest average life expectancy?  
+
+```{r}
+life_expectancy_lim <- life_expectancy_long %>%
+  filter(year >= 1920, year <=2020) %>%
+  group_by(country) %>%
+  summarise(average_life_expectancy = mean(life_expectancy, na.rm = T)) %>%
+  arrange(desc(average_life_expectancy))
+life_expectancy_lim
+
+slice_max(life_expectancy_lim, average_life_expectancy)
+#Andorra has the highest average life expectancy
+slice_min(life_expectancy_lim, average_life_expectancy)
+#The Central African Republic has the lowest averange life expectancy
+```
+
+4. (3 points) Although we can see which country has the highest life expectancy for the past 100 years, we don't know which countries have changed the most. What are the top 5 countries that have experienced the biggest improvement in life expectancy between 1920-2020?  
+```{r}
+head(life_expectancy)
+anyNA(life_expectancy)
+
+le_max_change <- life_expectancy %>%
+  select(country, X1920, X2020) %>%
+  na.omit() %>%
+  mutate(change = X2020 - X1920) %>%
+  top_n(5) %>%
+  arrange(desc(change))
+le_max_change
+```
+
+5. (3 points) Make a plot that shows the change over the past 100 years for the country with the biggest improvement in life expectancy. Be sure to add appropriate aesthetics to make the plot clean and clear. Once you have made the plot, do a little internet searching and see if you can discover what historical event may have contributed to this remarkable change.  
+```{r}
+Kuwait <- life_expectancy_long %>%
+  filter(country == 'Kuwait', year >= 1920, year <= 2020) %>%
+  na.omit() %>%
+  ggplot(aes(x = year, y = life_expectancy))
+
+Kuwait +
+  geom_line(size = 1) +
+  labs(title = 'Life Expectancy in Kuwait From 1920 to 2020',
+       x = 'year',
+       y = 'life expectancy') +
+  theme()
+```
+
+## Population Growth
+6. (3 points) Which 5 countries have had the highest population growth over the past 100 years (1920-2020)?  
+
+7. (4 points) Produce a plot that shows the 5 countries that have had the highest population growth over the past 100 years (1920-2020). Which countries appear to have had exponential growth?  
+
+## Income
+The units used for income are gross domestic product per person adjusted for differences in purchasing power in international dollars.
+
+8. (4 points) As in the previous questions, which countries have experienced the biggest growth in per person GDP. Show this as a table and then plot the changes for the top 5 countries. With a bit of research, you should be able to explain the dramatic downturns of the wealthiest economies that occurred during the 1980's.  
+
+asking you to compare change in GDP between some of the countries
+
+9. (3 points) Create three new objects that restrict each data set (life expectancy, population, income) to the years 1920-2020. Hint: I suggest doing this with the long form of your data. Once this is done, merge all three data sets using the code I provide below. You may need to adjust the code depending on how you have named your objects. I called mine `life_expectancy_100`, `population_100`, and `income_100`. For some of you, learning these `joins` will be important for your project.  
+
+```{r}
+#gapminder_join <- inner_join(life_expectancy_100, population_100, by= c("country", "year"))
+#gapminder_join <- inner_join(gapminder_join, income_100, by= c("country", "year"))
+#gapminder_join
+```
+
+10. (4 points) Use the joined data to perform an analysis of your choice. The analysis should include a comparison between two or more of the variables `life_expectancy`, `population`, or `income.`  

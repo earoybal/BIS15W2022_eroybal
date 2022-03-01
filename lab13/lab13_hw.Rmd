@@ -1,11 +1,12 @@
 ---
 title: "Lab 13 Homework"
-author: "Please Add Your Name Here"
+author: "Evan Roybal"
 date: "`r Sys.Date()`"
 output:
   html_document:
     theme: spacelab
     toc: no
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -22,6 +23,9 @@ Make sure to use the formatting conventions of RMarkdown to make your report nea
 library(tidyverse)
 library(shiny)
 library(shinydashboard)
+library(skimr)
+library(naniar)
+library(ggthemes)
 ```
 
 ## Choose Your Adventure!
@@ -44,7 +48,56 @@ We will use data from a study on vertebrate community composition and impacts fr
 
 **1. Load the `IvindoData_DryadVersion.csv` data and use the function(s) of your choice to get an idea of the overall structure, including its dimensions, column names, variable classes, etc. As part of this, determine if NA's are present and how they are treated.**  
 
+```{r}
+gabon <- read.csv('data/gabon_data/IvindoData_DryadVersion.csv')
+
+dim(gabon)
+
+colnames(gabon)
+
+skim(gabon)
+
+miss_var_summary(gabon)
+
+glimpse(gabon)
+
+```
+
+
 **2. Build an app that re-creates the plots shown on page 810 of this paper. The paper is included in the folder. It compares the relative abundance % to the distance from villages in rural Gabon. Use shiny dashboard and add aesthetics to the plot.  **  
 
-## Push your final code to GitHub!
-Please be sure that you check the `keep md` file in the knit preferences. 
+```{r}
+ui <- dashboardPage(
+  dashboardHeader(title = 'Relative Abundance'),
+  dashboardSidebar(disable = TRUE),
+  dashboardBody(
+    fluidRow(
+      box(
+        selectInput('y', 'Select Species Group', choices = c('RA_Apes', 'RA_Birds', 'RA_Elephant', 'RA_Monkeys', 'RA_Rodent', 'RA_Ungulate'),
+                    selected = 'RA_Apes'),
+        sliderInput('pointsize', 'Select point size', min = 1, max = 5, value = 2, step = 0.5)
+      ),
+      
+      box(
+        plotOutput("plot", width = '500px', height = '500px')
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    ggplot(gabon, aes_string(x = 'Distance', y = input$y)) +
+      geom_point(size = input$pointsize) +
+      geom_smooth(method = lm) +
+      theme_clean() +
+      labs(y = 'Relative Abundance (%)',
+           x = 'Distance to Nearest Village (km)',
+           title = input$y)
+  })
+  session$onSessionEnded(stopApp)
+}
+
+shinyApp(ui, server)
+```
+

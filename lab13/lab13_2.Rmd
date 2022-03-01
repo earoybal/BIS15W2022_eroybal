@@ -302,11 +302,11 @@ ui <- dashboardPage(
   dashboardBody(
     fluidRow(
       box(title = 'Select Population',
-          width = 3,
+          width = 5,
           selectInput('x', 'Select Wolf Population', choices = unique(wolves$pop),
                       selected = 'AK.PEN'),
       box(title = 'Plot of Population Distribution by Sex',
-          width = 7,
+          width = 5,
           plotOutput('plot', width = '600px', height = '500px')
       )
       )
